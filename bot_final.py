@@ -24,8 +24,8 @@ def get_prices():
     
     
 def portfolio(update, context):
-    print(prices)
     prices = get_prices()
+    print(prices)
     msg = "📊 Tu portfolio actual:\n"
     total = 0
     for symbol, data in tokens.items():

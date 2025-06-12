@@ -22,19 +22,23 @@ def get_prices():
     return requests.get(url).json()
     
     
-    print(prices)  # Esto aparece en los logs de Render
-async def portfolio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    
+def portfolio(update, context):
     prices = get_prices()
     msg = "📊 Tu portfolio actual:\n"
     total = 0
     for symbol, data in tokens.items():
         amount = data["amount"]
-        price = prices[data["id"]]["eur"]
+        price = prices.get(data["id"], {}).get("eur", None)
+        if price is None:
+            msg += f"- {symbol.upper()}: Precio no disponible\n"
+            continue
         value = amount * price
         total += value
         msg += f"- {symbol.upper()}: {amount:.2f} → {value:.2f}€ (Precio: {price:.4f})\n"
     msg += f"💼 Total: {total:.2f}€"
-    await update.message.reply_text(msg)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+
 
 async def comprar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) != 3:

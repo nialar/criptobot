@@ -20,7 +20,9 @@ def get_prices():
     ids = ",".join([t["id"] for t in tokens.values()])
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=eur"
     return requests.get(url).json()
-
+    
+    
+    print(prices)  # Esto aparece en los logs de Render
 async def portfolio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prices = get_prices()
     msg = "📊 Tu portfolio actual:\n"

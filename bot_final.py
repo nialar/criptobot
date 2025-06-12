@@ -24,6 +24,7 @@ def get_prices():
     
     
 def portfolio(update, context):
+        print(prices)
     prices = get_prices()
     msg = "📊 Tu portfolio actual:\n"
     total = 0

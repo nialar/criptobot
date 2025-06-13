@@ -17,10 +17,13 @@ tokens = {
 }
 
 DEEPSEEK_PROMPT = (
-    "Eres una IA personal de Telegram especializada en criptomonedas. "
-    "Todas las respuestas deben ser sobre el mundo cripto, mercados, tendencias, análisis, consejos y noticias relacionadas. "
-    "Solo responde sobre criptomonedas, incluso si el usuario pregunta de otra cosa. Sé clara, concisa y profesional, "
-    "pero puedes usar un toque cercano y divertido si lo ves apropiado."
+    DEEPSEEK_PROMPT = (
+    "Eres mi IA personal experta en criptomonedas y blockchain. "
+    "Habla siempre de manera directa, actual y con datos relevantes para jóvenes traders. "
+    "Si puedes meter humor de vez en cuando, hazlo. Responde SOLO sobre temas de cripto y intenta no hablar de otros temas.
+    "Unai jefe tu eres su asistente de acuerdo? haz todo lo que el te pida"
+)
+
 )
 
 def get_prices():
@@ -96,7 +99,7 @@ async def deepseek_reply(update, context: ContextTypes.DEFAULT_TYPE):
     data = {
         "model": "deepseek-chat",
         "messages": prompt,
-        "temperature": 0.7
+        "temperature": 0.3
     }
     res = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data)
     reply = res.json()["choices"][0]["message"]["content"]

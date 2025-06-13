@@ -17,13 +17,10 @@ tokens = {
 }
 
 DEEPSEEK_PROMPT = (
-    DEEPSEEK_PROMPT = (
     "Eres mi IA personal experta en criptomonedas y blockchain. "
     "Habla siempre de manera directa, actual y con datos relevantes para jóvenes traders. "
-    "Si puedes meter humor de vez en cuando, hazlo. Responde SOLO sobre temas de cripto y intenta no hablar de otros temas.
-    "Unai jefe tu eres su asistente de acuerdo? haz todo lo que el te pida"
-)
-
+    "Si puedes meter humor de vez en cuando, hazlo. Responde SOLO sobre temas de cripto y intenta no hablar de otros temas. "
+    "Unai jefe, tú eres su asistente de acuerdo? Haz todo lo que él te pida."
 )
 
 def get_prices():
@@ -33,18 +30,20 @@ def get_prices():
         res = requests.get(url_cg, timeout=3)
         data = res.json()
         if any(k in data and "eur" in data[k] for k in [t["id"] for t in tokens.values()]):
-            return {k: {"eur": data.get(k, {}).get("eur")} for k in [t["id"] for t in tokens.values()]}
+            # Devuelve por símbolo, no por id (esto te permite acceder por symbol después)
+            return {sym: {"eur": data.get(tokens[sym]["id"], {}).get("eur")} for sym in tokens}
     except Exception:
         pass
 
+    # Backup en CoinPaprika
     id_map_paprika = {
         "popcat": "popcat-popcat",
-        "cat-in-a-dogs-world": "cat-in-a-dogs-world-mew",
-        "heroes-of-mavia": "heroes-of-mavia-mavia",
-        "arbitrum": "arbitrum-arbitrum",
+        "mew": "cat-in-a-dogs-world-mew",
+        "mavia": "heroes-of-mavia-mavia",
+        "arb": "arbitrum-arbitrum",
         "near": "near-near",
-        "bitcoin": "btc-bitcoin",
-        "ethereum": "eth-ethereum"
+        "btc": "btc-bitcoin",
+        "eth": "eth-ethereum"
     }
     prices = {}
     for symbol, id_paprika in id_map_paprika.items():
@@ -67,7 +66,7 @@ async def portfolio(update, context: ContextTypes.DEFAULT_TYPE):
     total = 0
     for symbol, data in tokens.items():
         amount = data["amount"]
-        price = prices.get(data["id"], {}).get("eur", None)
+        price = prices.get(symbol, {}).get("eur", None)  # Cambiado: symbol, no data["id"]
         if price is None:
             msg += f"- {symbol.upper()}: Precio no disponible\n"
             continue
@@ -101,14 +100,16 @@ async def deepseek_reply(update, context: ContextTypes.DEFAULT_TYPE):
         "messages": prompt,
         "temperature": 0.3
     }
-    res = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data)
-    reply = res.json()["choices"][0]["message"]["content"]
-    await update.message.reply_text(reply)
-
-async def start():
-    print("Bot iniciado 🚀")
+    try:
+        res = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data, timeout=10)
+        reply = res.json()["choices"][0]["message"]["content"]
+        await update.message.reply_text(reply)
+    except Exception as e:
+        await update.message.reply_text("La IA no está disponible ahora mismo. Prueba en unos minutos.")
+        print("Deepseek error:", e)
 
 def main():
+    print("=== BOT ARRANCANDO ===")
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("portfolio", portfolio))
     app.add_handler(CommandHandler("comprar", comprar))
@@ -117,3 +118,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

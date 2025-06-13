@@ -1,4 +1,4 @@
 app = "criptobot-6m5kwg"  # O el nombre de tu app real
 
 [build]
-  builder = 
+dockerfile = "Dockerfile"
